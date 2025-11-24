@@ -9,8 +9,9 @@ public class Card
 
     public Card(String rank, String suit) {
         this.rank = rank;
-        this.suit = suit;
+        this.suit = suit; 
     }
+    //
     public int getValue() {
         if (rank.equals("A"))
             return Constants.ACE_HIGH_VALUE;
