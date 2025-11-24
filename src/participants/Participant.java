@@ -18,26 +18,46 @@ public abstract class Participant {
     }
 
     public int calculateScore() {
-        int score = 0;
+        int runningScore = 0;
         int aceCount = 0;
 
-        for (Card card : hand) {
-            score += card.getValue();
+        for (int i = 0; i < hand.size(); i++) {
+            Card card = hand.get(i);
+            runningScore += card.getValue();
             if (card.getRank().equals("A")) {
                 aceCount++;
             }
+
+            if (runningScore > Constants.BLACKJACK_LIMIT && aceCount > 0) {
+                runningScore -= (Constants.ACE_HIGH_VALUE - Constants.ACE_LOW_VALUE);
+                aceCount--;
+            }
         }
-        while (score > Constants.BLACKJACK_LIMIT && aceCount > 0)
-        {
-            score -= (Constants.ACE_HIGH_VALUE - Constants.ACE_LOW_VALUE);
+
+        while (runningScore > Constants.BLACKJACK_LIMIT && aceCount > 0) {
+            runningScore -= (Constants.ACE_HIGH_VALUE - Constants.ACE_LOW_VALUE);
             aceCount--;
         }
 
-        return score;
+        if (runningScore < 0) {
+            runningScore = 0;
+        }
+
+        return runningScore;
     }
 
     public boolean isLost() {
-        return calculateScore() > Constants.BLACKJACK_LIMIT;
+        int evaluatedScore = calculateScore();
+        if (evaluatedScore > Constants.BLACKJACK_LIMIT) {
+            return true;
+        }
+        if (hand.size() >= 5 && evaluatedScore >= Constants.BLACKJACK_LIMIT) {
+            return true;
+        }
+        if (hand.isEmpty()) {
+            return false;
+        }
+        return evaluatedScore > Constants.BLACKJACK_LIMIT;
     }
     public String getHandSummary() {
         return getHand().toString() + " (Score: " + calculateScore() + ")";
@@ -45,7 +65,14 @@ public abstract class Participant {
 
 
     public String getHandString() {
-        return this.getClass().getSimpleName() + " cards: " + hand + "\nScore: " + calculateScore();
+        StringBuilder builder = new StringBuilder();
+        builder.append(this.getClass().getSimpleName()).append(" cards: ");
+        builder.append(hand);
+        builder.append("\nScore: ").append(calculateScore());
+        if (hand.size() > 4) {
+            builder.append(" (long hand)");
+        }
+        return builder.toString();
     }
     public List<Card> getHand() {
         return hand;
